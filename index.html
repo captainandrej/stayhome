@@ -33,6 +33,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
+        /* Skrytie scrollbaru pre čistý vzhľad */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -40,6 +41,7 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        /* Orezanie nežiaducich horných/spodných líšt v embedoch s hardvérovou akceleráciou */
         .embed-crop-container {
             position: relative;
             overflow: hidden;
@@ -74,6 +76,7 @@
 
     <!-- TOP HEADER -->
     <header class="sticky top-0 z-40 bg-black/95 backdrop-blur-md border-b border-neutral-900 px-4 py-3 flex items-center justify-between">
+        <!-- Ľavá strana: Zvonček a Darček -->
         <div class="flex items-center space-x-2.5">
             <button id="giftBtn" onclick="toggleModal('supportModal')" class="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-phub-orange transition">
                 <i class="fa-solid fa-gift text-sm"></i>
@@ -83,11 +86,13 @@
             </button>
         </div>
 
+        <!-- Logo v strede -->
         <div class="flex items-center space-x-0.5 cursor-pointer" onclick="filterCategory('all')">
             <span class="text-xl font-bold tracking-tight text-white">Stay</span>
             <span class="text-xl font-bold tracking-tight bg-phub-orange text-black px-1.5 py-0.5 rounded ml-0.5">home</span>
         </div>
 
+        <!-- Pravá strana: Prepínač zobrazenia (Mobil / Monitor) -->
         <div class="flex items-center space-x-2">
             <button id="layoutMobileBtn" onclick="switchLayout('mobile')" class="w-9 h-9 rounded-full bg-phub-orange text-black flex items-center justify-center transition shadow-md" title="Mobile Layout">
                 <i class="fa-solid fa-mobile-screen text-sm"></i>
@@ -98,7 +103,7 @@
         </div>
     </header>
 
-    <!-- KATEGÓRIE -->
+    <!-- KATEGÓRIE (Tlačidlá) -->
     <div class="px-4 py-3 flex items-center space-x-2 overflow-x-auto no-scrollbar border-b border-neutral-900 bg-black">
         <button onclick="filterCategory('all')" id="btn-all" class="category-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition bg-phub-orange text-black shadow-lg shadow-phub-orange/25">
             <i class="fa-solid fa-layer-group mr-1.5"></i> All
@@ -111,18 +116,19 @@
         </button>
     </div>
 
-    <!-- HLAVNÝ OBSAH -->
+    <!-- HLAVNÝ OBSAH (Dynamická šírka podľa layoutu) -->
     <main id="appContainer" class="max-w-md mx-auto px-4 py-4 transition-all duration-300">
+        <!-- Dynamicky generovaný obsah -->
     </main>
 
-    <!-- PÄTIČKA -->
+    <!-- PÄTIČKA (FOOTER) -->
     <footer id="footerContainer" class="max-w-md mx-auto px-4 pt-6 pb-12 mt-8 border-t border-neutral-900 text-center text-xs text-neutral-500 space-y-2 transition-all">
         <p class="font-medium text-neutral-400">Created by <span class="text-white font-semibold">danddy</span> • Version <span class="text-phub-orange font-mono">1.0.0</span></p>
         <p>Videos and media content are hosted by external network providers (Pornhub Network & Social Creators).</p>
         <p class="text-neutral-600">© 2026 Stay home. All rights reserved.</p>
     </footer>
 
-    <!-- MODAL: PREHRÁVAČ -->
+    <!-- MODAL OKNO: PREHRÁVAČ VIDEA S HD KVALITOU A HARDVÉROVOU AKCELERÁCIOU -->
     <div id="videoModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex flex-col justify-between">
         <div class="px-4 py-3 flex items-center justify-between border-b border-neutral-800 bg-neutral-950">
             <div class="flex items-center space-x-2 truncate">
@@ -131,6 +137,7 @@
             </div>
             
             <div class="flex items-center space-x-3">
+                <!-- Výber kvality videa -->
                 <div class="relative">
                     <select id="videoQualitySelect" onchange="changeVideoQuality(this.value)" class="bg-neutral-900 text-neutral-200 border border-neutral-700 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-phub-orange font-medium">
                         <option value="1080" selected>1080p HD</option>
@@ -139,6 +146,7 @@
                         <option value="360">360p</option>
                     </select>
                 </div>
+
                 <button onclick="closeVideoModal()" class="w-8 h-8 rounded-full bg-neutral-900 flex items-center justify-center text-neutral-400 hover:text-white">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
@@ -146,7 +154,9 @@
         </div>
 
         <div class="w-full flex-1 flex items-center justify-center bg-black p-0 relative">
-            <div id="modalPlayerWrapper" class="w-full h-full max-h-[75vh] flex items-center justify-center"></div>
+            <div id="modalPlayerWrapper" class="w-full h-full max-h-[75vh] flex items-center justify-center">
+                <!-- Vložený iframe prehrávač -->
+            </div>
         </div>
 
         <div class="p-4 bg-neutral-950 border-t border-neutral-900 flex items-center justify-between">
@@ -170,7 +180,7 @@
         </div>
     </div>
 
-    <!-- MODAL: PODPORA -->
+    <!-- MODAL OKNO: PODPORA (GIFT / CRYPTO) -->
     <div id="supportModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center px-4">
         <div class="bg-neutral-900 border border-neutral-800 w-full max-w-sm rounded-2xl p-5 shadow-2xl relative">
             <button onclick="toggleModal('supportModal')" class="absolute top-4 right-4 text-neutral-400 hover:text-white">
@@ -184,7 +194,9 @@
                 <p class="text-xs text-neutral-400">Choose your crypto option to send support</p>
             </div>
 
+            <!-- Prehľad kryptomien -->
             <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                <!-- Ethereum -->
                 <div class="bg-black/50 border border-neutral-800 p-3 rounded-xl">
                     <div class="flex items-center space-x-2 mb-2">
                         <div class="w-7 h-7 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-xs font-bold">Ξ</div>
@@ -196,6 +208,7 @@
                     <p class="text-[10px] font-mono text-neutral-400 break-all text-center bg-neutral-900 p-1.5 rounded border border-neutral-800">0xb2f9C7177fbAaC374aE196fDBC61daDA094dc27a</p>
                 </div>
 
+                <!-- USDC / Arc -->
                 <div class="bg-black/50 border border-neutral-800 p-3 rounded-xl">
                     <div class="flex items-center space-x-2 mb-2">
                         <div class="w-7 h-7 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center text-xs font-bold">$</div>
@@ -214,7 +227,7 @@
         </div>
     </div>
 
-    <!-- MODAL: NOTIFIKÁCIE -->
+    <!-- MODAL OKNO: NOTIFIKÁCIE & EMAIL (ZVONČEK) -->
     <div id="notifModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center px-4">
         <div class="bg-neutral-900 border border-neutral-800 w-full max-w-sm rounded-2xl p-5 shadow-2xl relative">
             <button onclick="toggleModal('notifModal')" class="absolute top-4 right-4 text-neutral-400 hover:text-white">
@@ -244,6 +257,7 @@
     </div>
 
     <script>
+        // DATABÁZA VIDEÍ A PRÍSPEVKOV
         const socialMediaPosts = [
             {
                 id: 'sm1',
@@ -257,20 +271,6 @@
                 title: 'Relaxing weekend atmosphere and exclusive content',
                 channel: '@stayhome_official',
                 embedUrl: 'https://www.instagram.com/reel/DeUcRAhIHvw/?embed_slug=zYkdnyhxuw9i5',
-                aspect: '9/16'
-            },
-            {
-                id: 'sm3',
-                title: 'City vibes and special moments with friends',
-                channel: '@stayhome_official',
-                embedUrl: 'https://www.instagram.com/reel/Dd3JkhNMxWa/?embed_slug=mxFsZHRqYm0zazhlag==',
-                aspect: '9/16'
-            },
-            {
-                id: 'sm4',
-                title: 'Relaxing weekend atmosphere and exclusive content',
-                channel: '@stayhome_official',
-                embedUrl: 'https://www.instagram.com/reel/DepcwAzNJDJ/?embed_slug=zYkdnyhxuw9i5',
                 aspect: '9/16'
             }
         ];
@@ -396,9 +396,10 @@
         ];
 
         let currentCategory = 'all';
-        let currentLayout = 'mobile';
+        let currentLayout = 'mobile'; // 'mobile' alebo 'desktop'
         let activeVideoUrl = '';
 
+        // Prepínanie layoutu (Mobil / Monitor)
         function switchLayout(layout) {
             currentLayout = layout;
             const container = document.getElementById('appContainer');
@@ -420,24 +421,31 @@
             renderContent();
         }
 
+        // Filter kategórií a prepínanie farby tlačidiel
         function filterCategory(cat) {
             currentCategory = cat;
+            
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.className = "category-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition bg-neutral-900 text-neutral-300 border border-neutral-800";
             });
+            
             const activeBtn = document.getElementById(`btn-${cat}`);
             if(activeBtn) {
                 activeBtn.className = "category-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition bg-phub-orange text-black shadow-lg shadow-phub-orange/25 font-bold";
             }
+
             renderContent();
         }
 
+        // Vykreslenie obsahu na základe zvolenej kategórie a layoutu
         function renderContent() {
             const container = document.getElementById('appContainer');
             container.innerHTML = '';
+
             const gridClass = currentLayout === 'desktop' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-4';
 
             if (currentCategory === 'all') {
+                // 1. Sekcia Social Media na vrchu (Horizontalny karusel)
                 let socialSection = `
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-3">
@@ -464,6 +472,7 @@
                 socialSection += `</div></div>`;
                 container.innerHTML += socialSection;
 
+                // 2. Sekcia Phub+ pod tým
                 let phubSection = `
                     <div>
                         <div class="flex items-center justify-between mb-3">
@@ -500,6 +509,7 @@
                 container.innerHTML += phubSection;
 
             } else if (currentCategory === 'social') {
+                // Vertikálny feed pre Social Media
                 let socialFeed = `<div class="${currentLayout === 'desktop' ? 'grid grid-cols-2 md:grid-cols-3 gap-6' : 'space-y-6'}">`;
                 socialMediaPosts.forEach(post => {
                     socialFeed += `
@@ -528,6 +538,7 @@
                 container.innerHTML = socialFeed;
 
             } else if (currentCategory === 'phub') {
+                // Iba Phub+ videá
                 let phubOnly = `<div><div class="flex items-center justify-between mb-4"><h2 class="text-sm font-bold uppercase tracking-wider text-neutral-400">Phub+ Library (${phubVideos.length})</h2></div><div class="${gridClass}">`;
                 phubVideos.forEach(video => {
                     phubOnly += `
@@ -557,6 +568,7 @@
             }
         }
 
+        // Ovládanie modal okien
         function toggleModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal.classList.contains('hidden')) {
@@ -566,16 +578,19 @@
             }
         }
 
+        // Otvorenie video modal prehrávača s vysokou prioritou načítania
         function openVideoModal(url, title, channel) {
             activeVideoUrl = url;
             const modal = document.getElementById('videoModal');
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalChannel').innerText = channel;
             document.getElementById('modalExternalLink').href = url;
+
             updatePlayerEmbed();
             modal.classList.remove('hidden');
         }
 
+        // Reálna zmena kvality videa v prehrávači
         function changeVideoQuality(quality) {
             updatePlayerEmbed();
         }
@@ -583,11 +598,15 @@
         function updatePlayerEmbed() {
             const wrapper = document.getElementById('modalPlayerWrapper');
             const quality = document.getElementById('videoQualitySelect').value;
+            
+            // Pridanie parametra rozlíšenia / kvality do embed URL adresy
             let sep = activeVideoUrl.includes('?') ? '&' : '?';
             let qualityUrl = `${activeVideoUrl}${sep}quality=${quality}&hd=${quality >= 720 ? 1 : 0}`;
+
             wrapper.innerHTML = `<iframe src="${qualityUrl}" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
         }
 
+        // Zatvorenie video prehrávača
         function closeVideoModal() {
             const modal = document.getElementById('videoModal');
             const wrapper = document.getElementById('modalPlayerWrapper');
@@ -595,6 +614,7 @@
             modal.classList.add('hidden');
         }
 
+        // Odoslanie notifikačného emailu
         function submitSubscription() {
             const emailInput = document.getElementById('subEmailInput');
             const statusMsg = document.getElementById('subStatusMessage');
@@ -610,6 +630,7 @@
             }
         }
 
+        // Spustenie pri načítaní stránky
         window.onload = function() {
             filterCategory('all');
         }
