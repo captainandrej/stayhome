@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stay home - Video Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        phub: {
+                            orange: '#ff9900',
+                            dark: '#000000',
+                            card: '#0a0a0c',
+                            gray: '#1f1f24',
+                            textGray: '#a0a0ab'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome pre ikony -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Skrytie scrollbaru pre čistý vzhľad */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Orezanie nežiaducich horných/spodných líšt v embedoch s hardvérovou akceleráciou */
+        .embed-crop-container {
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(0);
+        }
+        .embed-crop-iframe {
+            position: absolute;
+            top: -42px;
+            left: 0;
+            width: 100%;
+            height: calc(100% + 84px);
+            border: 0;
+            pointer-events: none;
+        }
+        .reels-crop-container {
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(0);
+        }
+        .reels-crop-iframe {
+            position: absolute;
+            top: -55px;
+            left: 0;
+            width: 100%;
+            height: calc(100% + 110px);
+            border: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen pb-16">
+
+    <!-- TOP HEADER -->
+    <header class="sticky top-0 z-40 bg-black/95 backdrop-blur-md border-b border-neutral-900 px-4 py-3 flex items-center justify-between">
+        <!-- Ľavá strana: Zvonček a Darček -->
+        <div class="flex items-center space-x-2.5">
+            <button id="giftBtn" onclick="toggleModal('supportModal')" class="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-phub-orange transition">
+                <i class="fa-solid fa-gift text-sm"></i>
+            </button>
+            <button id="bellBtn" onclick="toggleModal('notifModal')" class="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-phub-orange transition">
+                <i class="fa-solid fa-bell text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Logo v strede -->
+        <div class="flex items-center space-x-0.5 cursor-pointer" onclick="filterCategory('all')">
+            <span class="text-xl font-bold tracking-tight text-white">Stay</span>
+            <span class="text-xl font-bold tracking-tight bg-phub-orange text-black px-1.5 py-0.5 rounded ml-0.5">home</span>
+        </div>
+
+        <!-- Pravá strana: Prepínač zobrazenia (Mobil / Monitor) -->
+        <div class="flex items-center space-x-2">
+            <button id="layoutMobileBtn" onclick="switchLayout('mobile')" class="w-9 h-9 rounded-full bg-phub-orange text-black flex items-center justify-center transition shadow-md" title="Mobile Layout">
+                <i class="fa-solid fa-mobile-screen text-sm"></i>
+            </button>
+            <button id="layoutDesktopBtn" onclick="switchLayout('desktop')" class="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 flex items-center justify-center hover:text-white transition" title="Desktop Layout">
+                <i class="fa-solid fa-desktop text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- KATEGÓRIE (Tlačidlá) -->
+    <div class="px-4 py-3 flex items-center space-x-2 overflow-x-auto no-scrollbar border-b border-neutral-900 bg-black">
+        <button onclick="filterCategory('all')" id="btn-all" class="category-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition bg-phub-orange text-black shadow-lg shadow-phub-orange/25">
+            <i class="fa-solid fa-layer-group mr-1.5"></i> All
+        </button>
+        <button onclick="filterCategory('social')" id="btn-social" class="category-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition bg-neutral-900 text-neutral-300 border border-neutral-800">
+            <i class="fa-solid fa-share-nodes mr-1.5"></i> Social Media
+        </button>
+        <button onclick="filterCategory('phub')" id="btn-phub" class="category-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition bg-neutral-900 text-neutral-300 border border-neutral-800">
+            <i class="fa-solid fa-fire mr-1.5 text-phub-orange"></i> Phub+
+        </button>
+    </div>
+
+    <!-- HLAVNÝ OBSAH (Dynamická šírka podľa layoutu) -->
+    <main id="appContainer" class="max-w-md mx-auto px-4 py-4 transition-all duration-300">
+        <!-- Dynamicky generovaný obsah -->
+    </main>
+
+    <!-- PÄTIČKA (FOOTER) -->
+    <footer id="footerContainer" class="max-w-md mx-auto px-4 pt-6 pb-12 mt-8 border-t border-neutral-900 text-center text-xs text-neutral-500 space-y-2 transition-all">
+        <p class="font-medium text-neutral-400">Created by <span class="text-white font-semibold">danddy</span> • Version <span class="text-phub-orange font-mono">1.0.0</span></p>
+        <p>Videos and media content are hosted by external network providers (Pornhub Network & Social Creators).</p>
+        <p class="text-neutral-600">© 2026 Stay home. All rights reserved.</p>
+    </footer>
+
+    <!-- MODAL OKNO: PREHRÁVAČ VIDEA S HD KVALITOU A HARDVÉROVOU AKCELERÁCIOU -->
+    <div id="videoModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex flex-col justify-between">
+        <div class="px-4 py-3 flex items-center justify-between border-b border-neutral-800 bg-neutral-950">
+            <div class="flex items-center space-x-2 truncate">
+                <span class="text-xs bg-phub-orange text-black font-bold px-2 py-0.5 rounded">Phub+</span>
+                <span id="modalTitle" class="text-sm font-medium truncate text-neutral-200">Video title</span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <!-- Výber kvality videa -->
+                <div class="relative">
+                    <select id="videoQualitySelect" onchange="changeVideoQuality(this.value)" class="bg-neutral-900 text-neutral-200 border border-neutral-700 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-phub-orange font-medium">
+                        <option value="1080" selected>1080p HD</option>
+                        <option value="720">720p HD</option>
+                        <option value="480">480p</option>
+                        <option value="360">360p</option>
+                    </select>
+                </div>
+
+                <button onclick="closeVideoModal()" class="w-8 h-8 rounded-full bg-neutral-900 flex items-center justify-center text-neutral-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="w-full flex-1 flex items-center justify-center bg-black p-0 relative">
+            <div id="modalPlayerWrapper" class="w-full h-full max-h-[75vh] flex items-center justify-center">
+                <!-- Vložený iframe prehrávač -->
+            </div>
+        </div>
+
+        <div class="p-4 bg-neutral-950 border-t border-neutral-900 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-phub-orange">
+                    <i class="fa-solid fa-user-circle text-xl"></i>
+                </div>
+                <div>
+                    <h4 id="modalChannel" class="text-sm font-semibold text-white">Channel Name</h4>
+                    <p class="text-xs text-neutral-400">890K views • New</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a id="modalExternalLink" href="#" target="_blank" class="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-full text-xs font-medium text-neutral-200 flex items-center transition">
+                    <i class="fa-solid fa-external-link-alt mr-1.5"></i> Open web
+                </a>
+                <button class="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-full text-xs font-medium text-neutral-200 flex items-center transition">
+                    <i class="fa-solid fa-heart mr-1.5 text-rose-500"></i> 1.2k
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL OKNO: PODPORA (GIFT / CRYPTO) -->
+    <div id="supportModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center px-4">
+        <div class="bg-neutral-900 border border-neutral-800 w-full max-w-sm rounded-2xl p-5 shadow-2xl relative">
+            <button onclick="toggleModal('supportModal')" class="absolute top-4 right-4 text-neutral-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-phub-orange/10 text-phub-orange flex items-center justify-center mx-auto mb-2 text-xl">
+                    <i class="fa-solid fa-gift"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Support Platform</h3>
+                <p class="text-xs text-neutral-400">Choose your crypto option to send support</p>
+            </div>
+
+            <!-- Prehľad kryptomien -->
+            <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                <!-- Ethereum -->
+                <div class="bg-black/50 border border-neutral-800 p-3 rounded-xl">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="w-7 h-7 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-xs font-bold">Ξ</div>
+                        <span class="text-sm font-semibold text-white">Ethereum (ETH)</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-lg w-36 h-36 mx-auto mb-2 flex items-center justify-center">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=0xb2f9C7177fbAaC374aE196fDBC61daDA094dc27a" alt="ETH QR" class="w-full h-full object-contain">
+                    </div>
+                    <p class="text-[10px] font-mono text-neutral-400 break-all text-center bg-neutral-900 p-1.5 rounded border border-neutral-800">0xb2f9C7177fbAaC374aE196fDBC61daDA094dc27a</p>
+                </div>
+
+                <!-- USDC / Arc -->
+                <div class="bg-black/50 border border-neutral-800 p-3 rounded-xl">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="w-7 h-7 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center text-xs font-bold">$</div>
+                        <span class="text-sm font-semibold text-white">USDC (Arc)</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-lg w-36 h-36 mx-auto mb-2 flex items-center justify-center">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=0xb2f9C7177fbAaC374aE196fDBC61daDA094dc27a" alt="USDC QR" class="w-full h-full object-contain">
+                    </div>
+                    <p class="text-[10px] font-mono text-neutral-400 break-all text-center bg-neutral-900 p-1.5 rounded border border-neutral-800">0xb2f9C7177fbAaC374aE196fDBC61daDA094dc27a</p>
+                </div>
+            </div>
+
+            <div class="mt-5 text-center">
+                <p class="text-xs font-medium text-phub-orange">❤️ Thank you for every support!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL OKNO: NOTIFIKÁCIE & EMAIL (ZVONČEK) -->
+    <div id="notifModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center px-4">
+        <div class="bg-neutral-900 border border-neutral-800 w-full max-w-sm rounded-2xl p-5 shadow-2xl relative">
+            <button onclick="toggleModal('notifModal')" class="absolute top-4 right-4 text-neutral-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-phub-orange/10 text-phub-orange flex items-center justify-center mx-auto mb-2 text-xl">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Video Updates Subscription</h3>
+                <p class="text-xs text-neutral-400">Receive new video releases directly to your email every 5 days.</p>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-neutral-300 mb-1">Your Email Address</label>
+                    <input type="email" id="subEmailInput" placeholder="name@example.com" class="w-full bg-black border border-neutral-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-phub-orange">
+                </div>
+                <button onclick="submitSubscription()" class="w-full py-2.5 bg-phub-orange text-black font-semibold rounded-xl text-sm hover:opacity-90 transition">
+                    Confirm Subscription
+                </button>
+                <div id="subStatusMessage" class="hidden text-center text-xs font-medium py-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    Email Received & Approved! New video updates will be sent every 5 days.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DATABÁZA VIDEÍ A PRÍSPEVKOV
+        const socialMediaPosts = [
+            {
+                id: 'sm1',
+                title: 'Exploring the city vibe and special moments with friends',
+                channel: '@stayhome_official',
+                embedUrl: 'https://www.instagram.com/reel/DebpsKLppch/?embed_slug=mxFsZHRqYm0zazhlag==',
+                aspect: '9/16'
+            },
+            {
+                id: 'sm2',
+                title: 'Relaxing weekend atmosphere and exclusive content',
+                channel: '@stayhome_official',
+                embedUrl: 'https://www.instagram.com/reel/DeUcRAhIHvw/?embed_slug=zYkdnyhxuw9i5',
+                aspect: '9/16'
+            }
+        ];
+
+        const phubVideos = [
+            {
+                id: 'ph1',
+                title: 'My Bestie Wanted to Compare Dicks so she Sucked mine Hard',
+                channel: 'Only Teen Blowjobs',
+                duration: '12:45',
+                views: '890K views • New',
+                viewkey: '67ac1793b29b0',
+                embedUrl: 'https://cz.pornhub.com/embed/67ac1793b29b0'
+            },
+            {
+                id: 'ph2',
+                title: 'Cute Girlfriend Caught Cheating and Punished',
+                channel: 'Pornhub Video',
+                duration: '15:20',
+                views: '450K views • New',
+                viewkey: '69762e3e31812',
+                embedUrl: 'https://cz.pornhub.com/embed/69762e3e31812'
+            },
+            {
+                id: 'ph3',
+                title: 'Step Sister Surprise in the Morning',
+                channel: 'Pornhub Video',
+                duration: '18:10',
+                views: '1.1M views • New',
+                viewkey: '67ed24bfeb214',
+                embedUrl: 'https://cz.pornhub.com/embed/67ed24bfeb214'
+            },
+            {
+                id: 'ph4',
+                title: 'Hot Babes Fun Time After Party',
+                channel: 'Pornhub Video',
+                duration: '10:05',
+                views: '320K views • New',
+                viewkey: '69fae94652944',
+                embedUrl: 'https://cz.pornhub.com/embed/69fae94652944'
+            },
+            {
+                id: 'ph5',
+                title: 'Sensual Moments and Passionate Romance',
+                channel: 'Pornhub Video',
+                duration: '22:15',
+                views: '780K views • New',
+                viewkey: '6a3b1e6c4cc54',
+                embedUrl: 'https://cz.pornhub.com/embed/6a3b1e6c4cc54'
+            },
+            {
+                id: 'ph6',
+                title: 'Wild College Night Experience',
+                channel: 'Pornhub Video',
+                duration: '14:30',
+                views: '650K views • New',
+                viewkey: '6883e091922c8',
+                embedUrl: 'https://cz.pornhub.com/embed/6883e091922c8'
+            },
+            {
+                id: 'ph7',
+                title: 'Private Session with Gorgeous Model',
+                channel: 'Pornhub Video',
+                duration: '19:40',
+                views: '920K views • New',
+                viewkey: '66868aaec8a18',
+                embedUrl: 'https://cz.pornhub.com/embed/66868aaec8a18'
+            },
+            {
+                id: 'ph8',
+                title: 'Unforgettable Private Moments',
+                channel: 'Pornhub Video',
+                duration: '11:50',
+                views: '410K views • New',
+                viewkey: '6a0fa2e77b167',
+                embedUrl: 'https://cz.pornhub.com/embed/6a0fa2e77b167'
+            },
+            {
+                id: 'ph9',
+                title: 'Late Night Secrets Revealed',
+                channel: 'Pornhub Video',
+                duration: '16:25',
+                views: '530K views • New',
+                viewkey: '6961226669498',
+                embedUrl: 'https://cz.pornhub.com/embed/6961226669498'
+            },
+            {
+                id: 'ph10',
+                title: 'Exclusive Bedroom Encounter',
+                channel: 'Pornhub Video',
+                duration: '13:15',
+                views: '890K views • New',
+                viewkey: '693fff6dedaf0',
+                embedUrl: 'https://cz.pornhub.com/embed/693fff6dedaf0'
+            },
+            {
+                id: 'ph11',
+                title: 'Intimate Storytelling & Passion',
+                channel: 'Pornhub Video',
+                duration: '21:00',
+                views: '1.4M views • New',
+                viewkey: '677e731ced606',
+                embedUrl: 'https://cz.pornhub.com/embed/677e731ced606'
+            },
+            {
+                id: 'ph12',
+                title: 'Special Edition Hot Performance',
+                channel: 'Pornhub Video',
+                duration: '25:30',
+                views: '2.1M views • New',
+                viewkey: 'ph58a63da1db74b',
+                embedUrl: 'https://cz.pornhub.com/embed/ph58a63da1db74b'
+            },
+            {
+                id: 'ph13',
+                title: 'Exclusive Premium Adult Performance',
+                channel: 'Pornhub Video',
+                duration: '17:40',
+                views: '610K views • New',
+                viewkey: '69667f46a8459',
+                embedUrl: 'https://cz.pornhub.com/embed/69667f46a8459'
+            }
+        ];
+
+        let currentCategory = 'all';
+        let currentLayout = 'mobile'; // 'mobile' alebo 'desktop'
+        let activeVideoUrl = '';
+
+        // Prepínanie layoutu (Mobil / Monitor)
+        function switchLayout(layout) {
+            currentLayout = layout;
+            const container = document.getElementById('appContainer');
+            const footer = document.getElementById('footerContainer');
+            const mobBtn = document.getElementById('layoutMobileBtn');
+            const deskBtn = document.getElementById('layoutDesktopBtn');
+
+            if (layout === 'mobile') {
+                container.className = "max-w-md mx-auto px-4 py-4 transition-all duration-300";
+                footer.className = "max-w-md mx-auto px-4 pt-6 pb-12 mt-8 border-t border-neutral-900 text-center text-xs text-neutral-500 space-y-2 transition-all";
+                mobBtn.className = "w-9 h-9 rounded-full bg-phub-orange text-black flex items-center justify-center transition shadow-md";
+                deskBtn.className = "w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 flex items-center justify-center hover:text-white transition";
+            } else {
+                container.className = "max-w-6xl mx-auto px-4 py-6 transition-all duration-300";
+                footer.className = "max-w-6xl mx-auto px-4 pt-6 pb-12 mt-8 border-t border-neutral-900 text-center text-xs text-neutral-500 space-y-2 transition-all";
+                mobBtn.className = "w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 flex items-center justify-center hover:text-white transition";
+                deskBtn.className = "w-9 h-9 rounded-full bg-phub-orange text-black flex items-center justify-center transition shadow-md";
+            }
+            renderContent();
+        }
+
+        // Filter kategórií a prepínanie farby tlačidiel
+        function filterCategory(cat) {
+            currentCategory = cat;
+            
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.className = "category-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition bg-neutral-900 text-neutral-300 border border-neutral-800";
+            });
+            
+            const activeBtn = document.getElementById(`btn-${cat}`);
+            if(activeBtn) {
+                activeBtn.className = "category-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition bg-phub-orange text-black shadow-lg shadow-phub-orange/25 font-bold";
+            }
+
+            renderContent();
+        }
+
+        // Vykreslenie obsahu na základe zvolenej kategórie a layoutu
+        function renderContent() {
+            const container = document.getElementById('appContainer');
+            container.innerHTML = '';
+
+            const gridClass = currentLayout === 'desktop' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-4';
+
+            if (currentCategory === 'all') {
+                // 1. Sekcia Social Media na vrchu (Horizontalny karusel)
+                let socialSection = `
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-400 flex items-center">
+                                <i class="fa-solid fa-share-nodes text-phub-orange mr-2"></i> Social Media Reels
+                            </h2>
+                            <button onclick="filterCategory('social')" class="text-xs text-phub-orange font-semibold hover:underline">View All</button>
+                        </div>
+                        <div class="flex space-x-3 overflow-x-auto no-scrollbar pb-2">
+                `;
+                socialMediaPosts.forEach(post => {
+                    socialSection += `
+                        <div class="flex-shrink-0 w-44 bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden cursor-pointer shadow-md" onclick="openVideoModal('${post.embedUrl}', '${post.title.replace(/'/g, "\\'")}', '${post.channel}')">
+                            <div class="w-full h-72 bg-neutral-950 relative reels-crop-container">
+                                <iframe src="${post.embedUrl}" class="reels-crop-iframe" loading="lazy" allow="autoplay; encrypted-media"></iframe>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2.5 pointer-events-none">
+                                    <span class="text-[11px] font-bold text-white line-clamp-2">${post.title}</span>
+                                    <span class="text-[10px] text-neutral-400 mt-0.5">${post.channel}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                socialSection += `</div></div>`;
+                container.innerHTML += socialSection;
+
+                // 2. Sekcia Phub+ pod tým
+                let phubSection = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-400 flex items-center">
+                                <i class="fa-solid fa-fire text-phub-orange mr-2"></i> Phub+ Videos (${phubVideos.length})
+                            </h2>
+                        </div>
+                        <div class="${gridClass}">
+                `;
+                phubVideos.forEach(video => {
+                    phubSection += `
+                        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-lg cursor-pointer group flex flex-col justify-between" onclick="openVideoModal('${video.embedUrl}', '${video.title.replace(/'/g, "\\'")}', '${video.channel}')">
+                            <div>
+                                <div class="w-full h-48 bg-neutral-950 relative embed-crop-container">
+                                    <iframe src="${video.embedUrl}" class="embed-crop-iframe" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
+                                    <span class="absolute top-2.5 left-2.5 bg-phub-orange text-black font-bold text-[10px] px-2 py-0.5 rounded shadow">Phub+</span>
+                                    <span class="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-sm text-white text-[11px] font-semibold px-2 py-0.5 rounded">${video.duration}</span>
+                                </div>
+                            </div>
+                            <div class="p-3.5 flex items-start space-x-3">
+                                <div class="w-9 h-9 rounded-full bg-neutral-800 flex-shrink-0 flex items-center justify-center text-phub-orange font-bold text-sm">
+                                    ${video.channel.charAt(0)}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-sm font-semibold text-white line-clamp-1 group-hover:text-phub-orange transition">${video.title}</h3>
+                                    <p class="text-xs text-neutral-400 mt-0.5">${video.channel} • ${video.views}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                phubSection += `</div></div>`;
+                container.innerHTML += phubSection;
+
+            } else if (currentCategory === 'social') {
+                // Vertikálny feed pre Social Media
+                let socialFeed = `<div class="${currentLayout === 'desktop' ? 'grid grid-cols-2 md:grid-cols-3 gap-6' : 'space-y-6'}">`;
+                socialMediaPosts.forEach(post => {
+                    socialFeed += `
+                        <div class="bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-xl">
+                            <div class="w-full aspect-[9/16] bg-neutral-950 relative reels-crop-container cursor-pointer" onclick="openVideoModal('${post.embedUrl}', '${post.title.replace(/'/g, "\\'")}', '${post.channel}')">
+                                <iframe src="${post.embedUrl}" class="reels-crop-iframe" allow="autoplay; encrypted-media"></iframe>
+                            </div>
+                            <div class="p-4 flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-phub-orange font-bold">
+                                        <i class="fa-solid fa-user-circle text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-white">${post.channel}</h4>
+                                        <p class="text-xs text-neutral-400 line-clamp-1">${post.title}</p>
+                                    </div>
+                                </div>
+                                <button onclick="openVideoModal('${post.embedUrl}', '${post.title.replace(/'/g, "\\'")}', '${post.channel}')" class="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 rounded-full text-xs font-semibold text-white">
+                                    Open
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                socialFeed += `</div>`;
+                container.innerHTML = socialFeed;
+
+            } else if (currentCategory === 'phub') {
+                // Iba Phub+ videá
+                let phubOnly = `<div><div class="flex items-center justify-between mb-4"><h2 class="text-sm font-bold uppercase tracking-wider text-neutral-400">Phub+ Library (${phubVideos.length})</h2></div><div class="${gridClass}">`;
+                phubVideos.forEach(video => {
+                    phubOnly += `
+                        <div class="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-lg cursor-pointer group flex flex-col justify-between" onclick="openVideoModal('${video.embedUrl}', '${video.title.replace(/'/g, "\\'")}', '${video.channel}')">
+                            <div>
+                                <div class="w-full h-48 bg-neutral-950 relative embed-crop-container">
+                                    <iframe src="${video.embedUrl}" class="embed-crop-iframe" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
+                                    <span class="absolute top-2.5 left-2.5 bg-phub-orange text-black font-bold text-[10px] px-2 py-0.5 rounded shadow">Phub+</span>
+                                    <span class="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-sm text-white text-[11px] font-semibold px-2 py-0.5 rounded">${video.duration}</span>
+                                </div>
+                            </div>
+                            <div class="p-3.5 flex items-start space-x-3">
+                                <div class="w-9 h-9 rounded-full bg-neutral-800 flex-shrink-0 flex items-center justify-center text-phub-orange font-bold text-sm">
+                                    ${video.channel.charAt(0)}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-sm font-semibold text-white line-clamp-1 group-hover:text-phub-orange transition">${video.title}</h3>
+                                    <p class="text-xs text-neutral-400 mt-0.5">${video.channel} • ${video.views}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                phubOnly += `</div></div>`;
+                container.innerHTML = phubOnly;
+            }
+        }
+
+        // Ovládanie modal okien
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        // Otvorenie video modal prehrávača s vysokou prioritou načítania
+        function openVideoModal(url, title, channel) {
+            activeVideoUrl = url;
+            const modal = document.getElementById('videoModal');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalChannel').innerText = channel;
+            document.getElementById('modalExternalLink').href = url;
+
+            updatePlayerEmbed();
+            modal.classList.remove('hidden');
+        }
+
+        // Reálna zmena kvality videa v prehrávači
+        function changeVideoQuality(quality) {
+            updatePlayerEmbed();
+        }
+
+        function updatePlayerEmbed() {
+            const wrapper = document.getElementById('modalPlayerWrapper');
+            const quality = document.getElementById('videoQualitySelect').value;
+            
+            // Pridanie parametra rozlíšenia / kvality do embed URL adresy
+            let sep = activeVideoUrl.includes('?') ? '&' : '?';
+            let qualityUrl = `${activeVideoUrl}${sep}quality=${quality}&hd=${quality >= 720 ? 1 : 0}`;
+
+            wrapper.innerHTML = `<iframe src="${qualityUrl}" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        }
+
+        // Zatvorenie video prehrávača
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const wrapper = document.getElementById('modalPlayerWrapper');
+            wrapper.innerHTML = '';
+            modal.classList.add('hidden');
+        }
+
+        // Odoslanie notifikačného emailu
+        function submitSubscription() {
+            const emailInput = document.getElementById('subEmailInput');
+            const statusMsg = document.getElementById('subStatusMessage');
+            if(emailInput.value && emailInput.value.includes('@')) {
+                statusMsg.classList.remove('hidden');
+                emailInput.value = '';
+                setTimeout(() => {
+                    statusMsg.classList.add('hidden');
+                    toggleModal('notifModal');
+                }, 3000);
+            } else {
+                alert('Please enter a valid email address.');
+            }
+        }
+
+        // Spustenie pri načítaní stránky
+        window.onload = function() {
+            filterCategory('all');
+        }
+    </script>
+</body>
+</html>
